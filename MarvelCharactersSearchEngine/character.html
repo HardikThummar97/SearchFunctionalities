@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Marvel™</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      body {
+        /* background-color: #202020; */
+        color: rgb(212, 228, 217);
+        font-weight: bold;
+        background-image: url(./img/logo2.jpg);
+        background-repeat: no-repeat;
+        background-size: cover;
+        background-attachment: fixed;
+        backdrop-filter: blur(5px);
+        /* display: flex; */
+        /* align-items: center;
+        justify-content: center; */
+      }
+      #charDetail {
+        width: 60vw;
+        /* height: 60vh; */
+        margin: auto;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+      }
+      #charDetail > h1,
+      #charDetail > p {
+        /* width: 30%; */
+        padding: 5px;
+        margin: 5px;
+        text-align: center;
+      }
+      h1 {
+        justify-content: center;
+      }
+      p {
+        justify-content: space-between;
+      }
+      ::-webkit-scrollbar {
+        width: 4px;
+        background: transparent; /* Optional: just make scrollbar invisible */
+      }
+      /* Optional: show position indicator in red */
+      ::-webkit-scrollbar-thumb {
+        border-radius: 50px;
+        background: #83f7fc;
+      }
+      #comics {
+        width: 80vw;
+        margin: 50px auto;
+        clear: both;
+        /* display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        justify-content: center;
+        gap: 1.5em; */
+      }
+      #comics > div {
+        padding: 0.5em;
+        margin-bottom: 20px;
+        text-overflow: ellipsis ellipsis;
+        overflow-y: scroll;
+        height: 200px;
+        display: grid;
+        grid-template-columns: 1fr 6fr;
+        gap: 2.5em;
+        border-radius: 0.5em;
+        cursor: pointer;
+        letter-spacing: 2px;
+        line-height: 1.5em;
+        box-shadow: 0 8px 8px -4px lightblue;
+      }
+      #comics img {
+        width: 100%;
+        min-height: 100px;
+        min-width: 100px;
+      }
+      .text h2 {
+        padding: 8px;
+        margin-bottom: 8px;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="charDetail"></div>
+    <div id="comics">
+      <!-- <div>
+        <div>
+          <img
+            src="http://i.annihil.us/u/prod/marvel/i/mg/6/d0/5819ed167de05.jpg"
+            alt="comic"
+          />
+        </div>
+        <div class="text">
+          <h2>title</h2>
+          <p>description</p>
+        </div>
+      </div> -->
+    </div>
+  </body>
+</html>
+<script>
+  let char_div = document.getElementById("charDetail");
+  let detail = JSON.parse(localStorage.getItem("charDetail"));
+  let h1 = document.createElement("h1");
+  h1.innerHTML = detail.name + " " + "comics";
+  char_div.append(h1);
+  let comic_div = document.getElementById("comics");
+
+  fetch(
+    `https://gateway.marvel.com:443/v1/public/characters/${detail.id}/comics?ts=1&apikey=c1829d4300eae29b8a93e85f091a8576&hash=4e137825c642c018bd982879cdbd7805`
+  )
+    .then((res) => res.json())
+    .then((res) => {
+      let data = res.data.results;
+
+      data.forEach((el, i) => {
+        let div = document.createElement("div");
+        div.innerHTML = `
+        <div>
+          <img
+            src=${el.thumbnail.path}.${el.thumbnail.extension}
+            alt="comic"
+          />
+        </div>
+        <div class="text">
+          <h2>${el.title}</h2>
+          <p>${
+            el.description ? el.description : "No description at moment!"
+          }</p>
+        </div>`;
+        comic_div.append(div);
+      });
+    });
+</script>

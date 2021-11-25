@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Marvel™</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      body {
+        /* background-color: #202020; */
+        color: #00fbff;
+        font-weight: bold;
+        background-image: url(./img/logo2.jpg);
+        background-repeat: no-repeat;
+        background-size: cover;
+        background-attachment: fixed;
+        backdrop-filter: blur(5px);
+      }
+      .searchBox {
+        width: 50vw;
+        min-width: 250px;
+        margin: 10vh auto;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+      input {
+        width: 400px;
+        padding: 10px;
+        border-radius: 15px;
+        outline: none;
+        border: none;
+      }
+      .input {
+        z-index: 1;
+      }
+      #characters {
+        position: absolute;
+        padding: 35px 10px 0px;
+        width: 400px;
+        max-height: 300px;
+        border-radius: 24px;
+        border: 2px solid rgb(219, 209, 163);
+        border-top: none;
+        visibility: hidden;
+        overflow-y: scroll;
+      }
+      #characters::-webkit-scrollbar {
+        width: 6px;
+        border-radius: 3px;
+      }
+      #characters::-webkit-scrollbar-thumb {
+        background-color: #83f7fc;
+        border-radius: 10px;
+      }
+      #characters div {
+        display: flex;
+        border-top: 1px solid #83f7fc;
+        justify-content: space-between;
+        padding: 10px 5px;
+        cursor: pointer;
+        transition: 0.3s;
+      }
+      #characters div:hover {
+        background-color: #ab3228;
+      }
+      #loading {
+        position: absolute;
+        width: 25px;
+        height: 25px;
+        border-radius: 50%;
+        margin-top: 4px;
+        margin-left: -31px;
+        visibility: hidden;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="searchBox">
+      <div class="input">
+        <input
+          oninput="throttleFn()"
+          type="text"
+          id="query"
+          placeholder="Search"
+        />
+        <img src="./img/Spinner-1.gif" id="loading" />
+      </div>
+      <div id="characters"></div>
+    </div>
+  </body>
+</html>
+
+<script>
+  let characters_div = document.getElementById("characters");
+  let loading = document.getElementById("loading");
+
+  let timerId;
+
+  const throttleFn = () => {
+    loading.style.visibility = "visible";
+    timerId && clearTimeout(timerId);
+
+    timerId = setTimeout(() => {
+      loading.style.visibility = "hidden";
+      main();
+    }, 1000);
+  };
+
+  const main = async () => {
+    let query = document.getElementById("query").value;
+    if (query.length > 0) {
+      characters_div.innerHTML = null;
+      characters_div.style.visibility = "visible";
+      let characters = await searchcharacters(); // Returned array will be a promise;
+      appendcharacters(characters); // Add results to the div;
+    } else {
+      characters_div.style.visibility = "hidden";
+    }
+  };
+
+  const searchcharacters = async () => {
+    let query = document.getElementById("query").value;
+
+    let res = await fetch(
+      `https://gateway.marvel.com/v1/public/characters?nameStartsWith=${query}&ts=1&orderBy=name&limit=10&apikey=c1829d4300eae29b8a93e85f091a8576&hash=4e137825c642c018bd982879cdbd7805`
+    );
+    let data = await res.json();
+    return data.data.results; //returning character result array;
+  };
+
+  const appendcharacters = (d) => {
+    if (d.length == 0) {
+      let p_error = document.createElement("p");
+      p_error.innerHTML = "No Match Found";
+      p_error.style.fontSize = "30px";
+      p_error.style.textAlign = "center";
+      characters_div.append(p_error);
+    } else {
+      d.forEach((el) => {
+        let div = document.createElement("div");
+        div.addEventListener("click", () => {
+          charDetails(el);
+        });
+
+        let p_name = document.createElement("span");
+        p_name.innerHTML = el.name;
+
+        // let p_img = document.createElement("img");
+        // p_img.src = el.thumbnail.path;
+
+        // let p_gender = document.createElement("span");
+        // p_gender.innerHTML = el.thumbnail.path;
+
+        div.append(p_name);
+
+        characters_div.append(div);
+      });
+    }
+  };
+
+  const charDetails = (el) => {
+    localStorage.setItem("charDetail", JSON.stringify(el));
+    window.location.href = "character.html";
+    // console.log("el:", el);
+  };
+</script>
